@@ -21,6 +21,18 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
             Serial.print(" : ");
             Serial.println(EEPROM.read(0));
         }
+        Serial.print("yawMin = ");
+        Serial.println(yawMin);
+        Serial.print("yawMax = ");
+        Serial.println(yawMax);
+        Serial.print("leftBrkMin = ");
+        Serial.println(leftBrakeMin);
+        Serial.print("rightBrkMin = ");
+        Serial.println(rightBrakeMin);
+        Serial.print("leftBrkMax = ");
+        Serial.println(leftBrakeMax);
+        Serial.print("rightBrkMax = ");
+        Serial.println(rightBrakeMax);
     }
 
 }
@@ -66,9 +78,6 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         // capture max/min values
         bool blinking = false;
         if (blinking == false) {
-            if (debug == true){
-                Serial.println("Blink loop...");
-            }
             blinking = true;
             blinking = ledsBlink(3, 50, 5, 6, 7);
         }

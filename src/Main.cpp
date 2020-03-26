@@ -70,7 +70,7 @@ joystick.begin();
  * Calibration variables are being read fm EEPROM on setup
  * */
 
-readEEPROM(leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
+readEEPROM(debug,leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
 Serial.print(yawMax);
 Serial.print(yawMin);
 joystick.setRzAxisRange(yawMin,yawMax);
@@ -81,7 +81,6 @@ joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
 void loop() {
 
-    delay(5000);
     channelYaw = adafruitAds1115.readADC_SingleEnded(0);
     channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
     channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);

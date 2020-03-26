@@ -43,16 +43,17 @@ bool ledsBlink(int pulses, int interval, int led1, int led2, int led3){
 
     for (int x = 0; x < pulses; x++){
 
+        checkpoint = millis();
+
         do {
-            checkpoint = millis();
             digitalWrite(led1, HIGH);
             digitalWrite(led2, HIGH);
             digitalWrite(led3, HIGH);
         } while (checkpoint + (interval / 2 * 1000) < millis());
 
+        checkpoint = millis();
+
         do {
-            checkpoint = millis();
-            checkpoint = millis();
             digitalWrite(led1, LOW);
             digitalWrite(led2, LOW);
             digitalWrite(led3, LOW);
