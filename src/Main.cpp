@@ -4,9 +4,13 @@
 #include <Wire.h>
 #include <MCP3424.h>
 #include <EEPROM.h>
+#include <Leds.h>
 
-#define JUMPERPIN 9
-#define GROUNDPIN 8
+#define LED1 5
+#define LED2 6
+#define LED3 7
+#define JUMPER 9
+#define GROUND 8
 
 Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID,JOYSTICK_TYPE_JOYSTICK,0,0, false, false, false, true, true, true, false,
                    false, false, false, false);
@@ -19,9 +23,14 @@ void setup() {
  * Arduino no. 9 - state pin for calibration jumper
  * */
 
-pinMode(GROUNDPIN,OUTPUT);
-pinMode(JUMPERPIN,INPUT_PULLUP);
-digitalWrite(GROUNDPIN,LOW);
+pinMode(GROUND,OUTPUT);
+pinMode(JUMPER,INPUT_PULLUP);
+pinMode(LED1,OUTPUT);
+pinMode(LED2,OUTPUT);
+pinMode(LED3,OUTPUT);
+digitalWrite(GROUND,LOW);
+
+ledSong(LED1,LED2,LED3);
 
 Joystick.begin();
 
