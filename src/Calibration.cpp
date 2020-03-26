@@ -1,6 +1,7 @@
 #include <EEPROM.h>
 #include <Arduino.h>
 #include <Joystick.h>
+#include <MCP3424.h>
 //
 // Created by yauta on 26.03.2020.
 //
@@ -31,7 +32,7 @@ void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin
 }
 
 void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin,long yawMax,long temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
-
+    MCP3424 mcp3424(0x68);
     leftBrakeMax=INT16_MIN;
     rightBrakeMax=INT16_MIN;
     yawMin=INT16_MAX;
