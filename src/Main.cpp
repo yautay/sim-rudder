@@ -68,7 +68,9 @@ Joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 }
 
 void loop(){
-if (JUMPER == LOW){
+if (digitalRead(JUMPER) == LOW){
     digitalWrite(LED3,HIGH);
+} else {
+    digitalWrite(LED3,LOW);
 }
 }
