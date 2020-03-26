@@ -1,9 +1,7 @@
 
 #include "Arduino.h"
 #include <Joystick.h>
-#include <Wire.h>
-#include <MCP3424.h>
-#include <EEPROM.h>
+#include <Adafruit_ADS1015.h>
 #include <Leds.h>
 #include <Calibration.h>
 
