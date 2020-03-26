@@ -1,26 +1,10 @@
 #include <EEPROM.h>
 #include <Arduino.h>
 #include <Joystick.h>
-#include <MCP3424.h>
-//
-// Created by yauta on 26.03.2020.
-//
+#include <Leds.h>
+#include <Adafruit_ADS1015.h>
 
-long filter(long channel)
-{
-    long sum=0;
-    int i=0;
-
-    for (i=0; i<50; i++)
-    {
-        sum = sum + channel;
-    }
-
-    sum = sum / 50;
-    return(sum);
-}
-
-void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin,long yawMax,long temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin) {
+void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin) {
 
     yawMin = (EEPROM.read(0) | (EEPROM.read(1) << 8));
     yawMax = (EEPROM.read(2) | (EEPROM.read(3) << 8));
@@ -31,13 +15,17 @@ void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin
 
 }
 
-void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin,long yawMax,long temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
-    MCP3424 mcp3424(0x68);
+void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
+
+    Adafruit_ADS1115 adafruitAds1115(0x48);
+    adafruitAds1115.begin();
+    adafruitAds1115.setGain(GAIN_ONE);
+
     leftBrakeMax=INT16_MIN;
     rightBrakeMax=INT16_MIN;
     yawMin=INT16_MAX;
     yawMax=INT16_MIN;
-    temp=0;
+    unsigned  int temp=0;
 
     // start calibration with brakes in neutral position
     digitalWrite(5,HIGH);
@@ -48,82 +36,39 @@ void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int right
     delay(1000);
     digitalWrite(5,HIGH);
     digitalWrite(7,HIGH);
-    leftBrakeMin = filter(3);
-    rightBrakeMin = filter(2);
+    leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
+    rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
     digitalWrite(5,LOW);
     digitalWrite(7,LOW);
-    delay(5000);
+    delay(2000);
 
     while (digitalRead(9) == LOW) {
 
         // capture max/min values
+        bool blinking = false;
+        if (!blinking) {
+            blinking = true;
+            blinking = ledsBlink(3, 1, 5, 6, 7);
+        }
 
-        if (true) {
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-            delay(100);
-            digitalWrite(5, LOW);
-            digitalWrite(6, LOW);
-            digitalWrite(7, LOW);
-            delay(100);
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-            delay(100);
-            digitalWrite(5, LOW);
-            digitalWrite(6, LOW);
-            digitalWrite(7, LOW);
-            delay(100);
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-            delay(100);
-            digitalWrite(5, LOW);
-            digitalWrite(6, LOW);
-            digitalWrite(7, LOW);
-            delay(100);
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-            delay(100);
-            digitalWrite(5, LOW);
-            digitalWrite(6, LOW);
-            digitalWrite(7, LOW);
-            delay(100);
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-            delay(100);
-            digitalWrite(5, LOW);
-            digitalWrite(6, LOW);
-            digitalWrite(7, LOW);
-            delay(100);
-            digitalWrite(5, HIGH);
-            digitalWrite(6, HIGH);
-            digitalWrite(7, HIGH);
-        } // blinks 1sec
 
-        temp = filter(1);
-        if (temp < yawMin) {
+        if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
             yawMin = temp;
         }
-        if (temp > yawMax) {
+        if (adafruitAds1115.readADC_SingleEnded(0) > yawMax) {
             yawMax = temp;
         }
 
-        temp = filter(3);
-        if (temp > leftBrakeMax) {
+        if (adafruitAds1115.readADC_SingleEnded(2) > leftBrakeMax) {
             leftBrakeMax = temp;
         }
 
-        temp = filter(2);
-        if (temp > rightBrakeMax) {
+        if (adafruitAds1115.readADC_SingleEnded(1) > rightBrakeMax) {
             rightBrakeMax = temp;
         }
     }
 
-    // set and save new Ranges
+    // set and save new ranges
     joystick.setRzAxisRange(yawMin,yawMax);
     joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
     joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
@@ -141,6 +86,6 @@ void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int right
     EEPROM.write(10, lowByte(rightBrakeMax));
     EEPROM.write(11, highByte(rightBrakeMax));
 
-    delay(1000);
+    ledSong(5,6,7);
 
 }
