@@ -19,7 +19,7 @@ long filter(long channel)
     return(sum);
 }
 
-void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin) {
+void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin,long yawMax,long temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin) {
 
     yawMin = (EEPROM.read(0) | (EEPROM.read(1) << 8));
     yawMax = (EEPROM.read(2) | (EEPROM.read(3) << 8));
@@ -30,7 +30,7 @@ void readEEPROM(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned in
 
 }
 
-void calibration(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
+void calibration(Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,long yawMin,long yawMax,long temp,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
 
     leftBrakeMax=INT16_MIN;
     rightBrakeMax=INT16_MIN;
@@ -51,39 +51,81 @@ void calibration(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned i
     rightBrakeMin = filter(2);
     digitalWrite(5,LOW);
     digitalWrite(7,LOW);
+    delay(5000);
 
-    // capture max/min values
+    while (digitalRead(9) == LOW) {
 
-    temp=filter(1);
-    if ( temp < yawMin)
-    {
-        yawMin=temp;
+        // capture max/min values
+
+        if (true) {
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+            delay(100);
+            digitalWrite(5, LOW);
+            digitalWrite(6, LOW);
+            digitalWrite(7, LOW);
+            delay(100);
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+            delay(100);
+            digitalWrite(5, LOW);
+            digitalWrite(6, LOW);
+            digitalWrite(7, LOW);
+            delay(100);
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+            delay(100);
+            digitalWrite(5, LOW);
+            digitalWrite(6, LOW);
+            digitalWrite(7, LOW);
+            delay(100);
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+            delay(100);
+            digitalWrite(5, LOW);
+            digitalWrite(6, LOW);
+            digitalWrite(7, LOW);
+            delay(100);
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+            delay(100);
+            digitalWrite(5, LOW);
+            digitalWrite(6, LOW);
+            digitalWrite(7, LOW);
+            delay(100);
+            digitalWrite(5, HIGH);
+            digitalWrite(6, HIGH);
+            digitalWrite(7, HIGH);
+        } // blinks 1sec
+
+        temp = filter(1);
+        if (temp < yawMin) {
+            yawMin = temp;
+        }
+        if (temp > yawMax) {
+            yawMax = temp;
+        }
+
+        temp = filter(3);
+        if (temp > leftBrakeMax) {
+            leftBrakeMax = temp;
+        }
+
+        temp = filter(2);
+        if (temp > rightBrakeMax) {
+            rightBrakeMax = temp;
+        }
     }
-    if ( temp > yawMax)
-    {
-        yawMax = temp;
-    }
-
-
-    temp=filter(2);
-    if ( temp > leftBrakeMax)
-    {
-        leftBrakeMax = temp;
-    }
-
-    temp=filter(2);
-    if ( temp > rightBrakeMax)
-    {
-        rightBrakeMax = temp;
-    }
-
-
-
 
     // set and save new Ranges
-    Joystick.setRzAxisRange(yawMin,yawMax);
-    Joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-    Joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+    joystick.setRzAxisRange(yawMin,yawMax);
+    joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
+    joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
     EEPROM.write(0, lowByte(yawMin));
     EEPROM.write(1, highByte(yawMin));
@@ -98,8 +140,6 @@ void calibration(unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned i
     EEPROM.write(10, lowByte(rightBrakeMax));
     EEPROM.write(11, highByte(rightBrakeMax));
 
-
-
-    delay(100);
+    delay(1000);
 
 }

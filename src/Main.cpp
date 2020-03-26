@@ -12,8 +12,11 @@
 #define LED3 7
 #define JUMPER 9
 #define GROUND 8
+#define MCP 0x68 //I2C
 
-Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
+MCP3424 mcp3424(MCP);
+
+Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
         0,
         0,
         false,
@@ -27,6 +30,18 @@ Joystick_ Joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
         false,
         false,
         false);
+
+unsigned int leftBrakeMax = 0;
+unsigned int rightBrakeMax = 0;
+long yawMin = 0;
+long yawMax = 0;
+long temp = 0;
+unsigned int leftBrakeMin = 0;
+unsigned int rightBrakeMin = 0;
+
+long channelYaw;
+long channelLeftBrk;
+long channelRightBrk;
 
 void setup() {
 
@@ -45,32 +60,35 @@ digitalWrite(GROUND,LOW);
 
 ledSong(LED1,LED2,LED3);
 
-Joystick.begin();
+joystick.begin();
+
 
 /*
- * Calibration variables are initialized and read fm EEPROM on setup
+ * Calibration variables are being read fm EEPROM on setup
  * */
-
-unsigned int leftBrakeMax = 0;
-unsigned int rightBrakeMax = 0;
-unsigned int yawMin = 0;
-unsigned int yawMax = 0;
-unsigned int temp = 0;
-unsigned int leftBrakeMin = 0;
-unsigned int rightBrakeMin = 0;
 
 readEEPROM(leftBrakeMax,rightBrakeMax,yawMin,yawMax,temp,leftBrakeMin,rightBrakeMin);
 
-Joystick.setRzAxisRange(yawMin,yawMax);
-Joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-Joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+joystick.setRzAxisRange(yawMin,yawMax);
+joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
+joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
 }
 
-void loop(){
-if (digitalRead(JUMPER) == LOW){
-    digitalWrite(LED3,HIGH);
-} else {
-    digitalWrite(LED3,LOW);
-}
+void loop() {
+    mcp3424.Configuration(1,14,1,1);
+    channelYaw = mcp3424.Measure();
+    mcp3424.Configuration(2,12,1,1);
+    channelRightBrk = mcp3424.Measure();
+    mcp3424.Configuration(3,12,1,1);
+    channelLeftBrk = mcp3424.Measure();
+
+    // get filtered ADC values and set Axis
+    joystick.setRzAxis(channelYaw);  // Yaw
+    joystick.setRxAxis(channelLeftBrk);  // LeftBrake
+    joystick.setRyAxis(channelRightBrk);  // RightBrake
+
+    if (digitalRead(JUMPER) == LOW) {
+        calibration(joystick, leftBrakeMax, rightBrakeMax, yawMin, yawMax, temp, leftBrakeMin, rightBrakeMin);
+    }
 }
