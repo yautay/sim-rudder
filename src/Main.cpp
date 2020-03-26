@@ -40,6 +40,8 @@ unsigned int channelYaw;
 unsigned int channelLeftBrk;
 unsigned int channelRightBrk;
 
+bool debug = true;
+
 void setup() {
 
 Serial.begin(9600);
@@ -69,7 +71,8 @@ joystick.begin();
  * */
 
 readEEPROM(leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
-
+Serial.print(yawMax);
+Serial.print(yawMin);
 joystick.setRzAxisRange(yawMin,yawMax);
 joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
 joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
@@ -78,6 +81,7 @@ joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
 void loop() {
 
+    delay(5000);
     channelYaw = adafruitAds1115.readADC_SingleEnded(0);
     channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
     channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
@@ -95,7 +99,7 @@ void loop() {
     joystick.setRyAxis(channelRightBrk);  // RightBrake
 
     if (digitalRead(JUMPER) == LOW) {
-        calibration(joystick, leftBrakeMax, rightBrakeMax, yawMin, yawMax, leftBrakeMin, rightBrakeMin);
+        calibration(debug,joystick, leftBrakeMax, rightBrakeMax, yawMin, yawMax, leftBrakeMin, rightBrakeMin);
     }
 
 }
