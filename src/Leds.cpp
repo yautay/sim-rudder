@@ -49,7 +49,7 @@ bool ledsBlink(int pulses, int interval, int led1, int led2, int led3){
             digitalWrite(led1, HIGH);
             digitalWrite(led2, HIGH);
             digitalWrite(led3, HIGH);
-        } while (checkpoint + (interval / 2 * 1000) < millis());
+        } while (checkpoint + (interval / 2 * 1000) > millis());
 
         checkpoint = millis();
 
@@ -57,7 +57,7 @@ bool ledsBlink(int pulses, int interval, int led1, int led2, int led3){
             digitalWrite(led1, LOW);
             digitalWrite(led2, LOW);
             digitalWrite(led3, LOW);
-        } while (checkpoint + (interval / 2 * 1000) < millis());
+        } while (checkpoint + (interval / 2 * 1000) > millis());
     }
     return false;
 }

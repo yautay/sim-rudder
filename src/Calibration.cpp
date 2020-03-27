@@ -77,16 +77,31 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         delay(5000);
     }
 
-    bool blinking = false;
+
 
     while (!digitalRead(9)) {
 
         // capture max/min values
-        if (!blinking) {
-            blinking = true;
-            blinking = ledsBlink(4, 500, 5, 6, 7);
-        }
+        int pulses = 10;
+        int interval = 1;
+        unsigned long checkpoint;
 
+        for (int x = 0; x < pulses; x++){
+
+            checkpoint = millis();
+
+            do {
+                digitalWrite(5, HIGH);
+                digitalWrite(6, HIGH);
+                digitalWrite(7, HIGH);
+            } while (checkpoint + (interval / 2 * 1000) > millis());
+
+            do {
+                digitalWrite(5, LOW);
+                digitalWrite(6, LOW);
+                digitalWrite(7, LOW);
+            } while (checkpoint + (interval * 1000) > millis());
+        }
 
         if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
             yawMin = adafruitAds1115.readADC_SingleEnded(0);
