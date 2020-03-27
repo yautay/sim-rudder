@@ -40,7 +40,7 @@ unsigned int channelYaw;
 unsigned int channelLeftBrk;
 unsigned int channelRightBrk;
 
-bool debug = true;
+bool debug = false;
 
 void setup() {
 
@@ -85,19 +85,23 @@ void loop() {
     channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
     channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
 
-    Serial.print(channelYaw);
-    Serial.print(" ");
-    Serial.print(channelLeftBrk);
-    Serial.print(" ");
-    Serial.print(channelRightBrk);
-    Serial.println(" ");
+    if (debug) {
+        Serial.print("Yaw : ");
+        Serial.print(channelYaw);
+        Serial.print(" // Left Brake : ");
+        Serial.print(channelLeftBrk);
+        Serial.print(" // Right Brake : ");
+        Serial.println(channelRightBrk);
+    }
 
     // get filtered ADC values and set Axis
     joystick.setRzAxis(channelYaw);  // Yaw
     joystick.setRxAxis(channelLeftBrk);  // LeftBrake
     joystick.setRyAxis(channelRightBrk);  // RightBrake
 
-    if (digitalRead(JUMPER) == LOW) {
+    joystick.sendState();
+
+    if (!digitalRead(JUMPER)) {
         calibration(debug,joystick, leftBrakeMax, rightBrakeMax, yawMin, yawMax, leftBrakeMin, rightBrakeMin);
     }
 
