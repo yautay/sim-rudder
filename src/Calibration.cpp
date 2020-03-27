@@ -52,7 +52,6 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
     rightBrakeMax=INT16_MIN;
     yawMin=INT16_MAX;
     yawMax=INT16_MIN;
-    unsigned  int temp=0;
 
     // start calibration with brakes in neutral position
     digitalWrite(5,HIGH);
