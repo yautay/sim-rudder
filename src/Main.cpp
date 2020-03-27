@@ -95,9 +95,9 @@ void loop() {
     }
 
     // get filtered ADC values and set Axis
-    joystick.setRzAxis(channelYaw);  // Yaw
-    joystick.setRxAxis(channelLeftBrk);  // LeftBrake
-    joystick.setRyAxis(channelRightBrk);  // RightBrake
+    joystick.setRzAxis(125);  // Yaw
+    joystick.setRxAxis(-125);  // LeftBrake
+    joystick.setRyAxis(77);  // RightBrake
 
     joystick.sendState();
 
