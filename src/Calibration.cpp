@@ -81,43 +81,39 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
 
     while (!digitalRead(9)) {
 
-        // capture max/min values
         int pulses = 10;
         int interval = 1;
         unsigned long checkpoint;
 
-        for (int x = 0; x < pulses; x++){
-
+        for (int x = 1; x <= pulses; x++){
             checkpoint = millis();
-
             do {
-                digitalWrite(5, HIGH);
-                digitalWrite(6, HIGH);
-                digitalWrite(7, HIGH);
+                if (x % 2 != 0) {
+                    digitalWrite(5, HIGH);
+                    digitalWrite(6, HIGH);
+                    digitalWrite(7, HIGH);
+                } else {
+                    digitalWrite(5, LOW);
+                    digitalWrite(6, LOW);
+                    digitalWrite(7, LOW);
+                }
+                if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
+                    yawMin = adafruitAds1115.readADC_SingleEnded(0);
+                }
+                if (adafruitAds1115.readADC_SingleEnded(0) > yawMax) {
+                    yawMax = adafruitAds1115.readADC_SingleEnded(0);
+                }
+
+                if (adafruitAds1115.readADC_SingleEnded(2) > leftBrakeMax) {
+                    leftBrakeMax = adafruitAds1115.readADC_SingleEnded(2);
+                }
+
+                if (adafruitAds1115.readADC_SingleEnded(1) > rightBrakeMax) {
+                    rightBrakeMax = adafruitAds1115.readADC_SingleEnded(1);
+                }
             } while (checkpoint + (interval / 2 * 1000) > millis());
-
-            do {
-                digitalWrite(5, LOW);
-                digitalWrite(6, LOW);
-                digitalWrite(7, LOW);
-            } while (checkpoint + (interval * 1000) > millis());
         }
-
-        if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
-            yawMin = adafruitAds1115.readADC_SingleEnded(0);
-        }
-        if (adafruitAds1115.readADC_SingleEnded(0) > yawMax) {
-            yawMax = adafruitAds1115.readADC_SingleEnded(0);
-        }
-
-        if (adafruitAds1115.readADC_SingleEnded(2) > leftBrakeMax) {
-            leftBrakeMax = adafruitAds1115.readADC_SingleEnded(2);
-        }
-
-        if (adafruitAds1115.readADC_SingleEnded(1) > rightBrakeMax) {
-            rightBrakeMax = adafruitAds1115.readADC_SingleEnded(1);
-        }
-    }
+    } // capture max/min values
 
     if (debug){
         Serial.println("Calibration 2/2 ... ");
