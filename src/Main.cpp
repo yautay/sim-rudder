@@ -12,7 +12,7 @@
 #define GROUND 8
 #define ADS1115 0x48 //I2C
 
-bool debug = true;
+bool debug = false;
 
 int16_t leftBrakeMax = 0;
 int16_t rightBrakeMax = 0;
