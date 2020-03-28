@@ -207,7 +207,7 @@ void calibration(){
                     digitalWrite(7, LOW);
                 }
                 tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (yawMin < 0 || yawMax > tmp){
+                if (yawMin < 0 || yawMin > tmp){
                     yawMin = tmp;
                 }
 
