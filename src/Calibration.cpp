@@ -4,7 +4,7 @@
 #include <Leds.h>
 #include <Adafruit_ADS1015.h>
 
-void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin) {
+void readEEPROM(bool debug,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t yawMin,int16_t yawMax,int16_t leftBrakeMin,int16_t rightBrakeMin) {
 
     yawMin = (EEPROM.read(0) | (EEPROM.read(1) << 8));
     yawMax = (EEPROM.read(2) | (EEPROM.read(3) << 8));
@@ -52,7 +52,7 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
 
 }
 
-void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin){
+void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t yawMin,int16_t yawMax,int16_t leftBrakeMin,int16_t rightBrakeMin){
 
     Adafruit_ADS1115 adafruitAds1115(0x48);
     adafruitAds1115.begin();
@@ -88,9 +88,10 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
 
     while (!digitalRead(9)) {
 
-        int pulses = 10;
-        int interval = 500; //milis
+        uint8_t pulses = 10;
+        uint16_t interval = 500; //milis
         unsigned long checkpoint;
+        uint16_t tmp;
 
         for (int x = 1; x <= pulses; x++){
             checkpoint = millis();
@@ -105,18 +106,36 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
                     digitalWrite(7, LOW);
                 }
                 if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
-                    yawMin = adafruitAds1115.readADC_SingleEnded(0);
+                        yawMin = adafruitAds1115.readADC_SingleEnded(0);
                 }
-                if (adafruitAds1115.readADC_SingleEnded(0) > yawMax) {
-                    yawMax = adafruitAds1115.readADC_SingleEnded(0);
+                tmp = adafruitAds1115.readADC_SingleEnded(0);
+                if (tmp > yawMax) {
+                    if(tmp > INT16_MAX){
+                        yawMax = INT16_MAX;
+                    } else {
+                        yawMax = tmp;
+                    }
+                    /*
+                     * adafruitAds1115.readADC_SingleEnded returns uint16_t -> that's why it's compared if not > INT16_MAX
+                     * */
                 }
-
-                if (adafruitAds1115.readADC_SingleEnded(2) > leftBrakeMax) {
-                    leftBrakeMax = adafruitAds1115.readADC_SingleEnded(2);
+                tmp = adafruitAds1115.readADC_SingleEnded(2);
+                if (tmp > leftBrakeMax) {
+                    if (tmp > INT16_MAX) {
+                        leftBrakeMax = INT16_MAX;
+                    } else {
+                    leftBrakeMax = tmp;
+                    }
+                    /*
+                     * adafruitAds1115.readADC_SingleEnded returns uint16_t -> that's why it's compared if not > INT16_MAX
+                     * */
                 }
-
-                if (adafruitAds1115.readADC_SingleEnded(1) > rightBrakeMax) {
-                    rightBrakeMax = adafruitAds1115.readADC_SingleEnded(1);
+                tmp = adafruitAds1115.readADC_SingleEnded(1);
+                if (tmp > rightBrakeMax) {
+                    if (tmp > INT16_MAX)
+                    rightBrakeMax = INT16_MAX;
+                } else{
+                    rightBrakeMax = tmp;
                 }
             } while (checkpoint + (interval / 2) > millis());
         }

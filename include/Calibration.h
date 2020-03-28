@@ -5,7 +5,7 @@
 #ifndef SIM_PEDALS_CALIBRATION_H
 #define SIM_PEDALS_CALIBRATION_H
 
-void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin);
-void calibration(bool debug,Joystick_ joystick,unsigned int leftBrakeMax,unsigned int rightBrakeMax,unsigned int yawMin,unsigned int yawMax,unsigned int leftBrakeMin,unsigned int rightBrakeMin);
+void readEEPROM(bool debug,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t yawMin,int16_t yawMax,int16_t leftBrakeMin,int16_t rightBrakeMin);
+void calibration(bool debug,Joystick_ joystick,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t yawMin,int16_t yawMax,int16_t leftBrakeMin,int16_t rightBrakeMin);
 
 #endif //SIM_PEDALS_CALIBRATION_H
