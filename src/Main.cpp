@@ -31,16 +31,16 @@ Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
         false,
         false);
 
-unsigned int leftBrakeMax = 0;
-unsigned int rightBrakeMax = 0;
-unsigned int yawMin = 0;
-unsigned int yawMax = 0;
-unsigned int leftBrakeMin = 0;
-unsigned int rightBrakeMin = 0;
+int16_t leftBrakeMax = 0;
+int16_t rightBrakeMax = 0;
+int16_t yawMin = 0;
+int16_t yawMax = 0;
+int16_t leftBrakeMin = 0;
+int16_t rightBrakeMin = 0;
 
-unsigned int channelYaw;
-unsigned int channelLeftBrk;
-unsigned int channelRightBrk;
+int16_t channelYaw;
+int16_t channelLeftBrk;
+int16_t channelRightBrk;
 
 bool debug = true;
 
@@ -74,28 +74,17 @@ joystick.begin();
 
 readEEPROM(debug,leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
 
-//joystick.setRzAxisRange(yawMin,yawMax);
-//joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-//joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
-
-joystick.setRzAxisRange(0,INT16_MAX);
-joystick.setRxAxisRange(0,INT16_MAX);
-joystick.setRyAxisRange(0,INT16_MAX);
+joystick.setRzAxisRange(yawMin,yawMax);
+joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
+joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
 }
 
 void loop() {
 
-//    channelYaw = adafruitAds1115.readADC_SingleEnded(0);
-//    channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
-//    channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
-
-    channelYaw = 0 + tmp;
-    channelRightBrk = 0 + tmp;
-    channelLeftBrk = 0 + tmp;
-
-    tmp++; //DEBUG
-    delay(25); //DEBUG
+    channelYaw = adafruitAds1115.readADC_SingleEnded(0);
+    channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
+    channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
 
     if (debug) {
         Serial.print("Yaw : ");
@@ -110,8 +99,6 @@ void loop() {
     joystick.setRzAxis(channelYaw);  // Yaw
     joystick.setRxAxis(channelLeftBrk);  // LeftBrake
     joystick.setRyAxis(channelRightBrk);  // RightBrake
-
-    joystick.sendState();
 
     if (!digitalRead(JUMPER)) {
         calibration(debug,joystick, leftBrakeMax, rightBrakeMax, yawMin, yawMax, leftBrakeMin, rightBrakeMin);
