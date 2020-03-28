@@ -74,9 +74,13 @@ joystick.begin();
 
 readEEPROM(debug,leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
 
-joystick.setRzAxisRange(yawMin,yawMax);
-joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+//joystick.setRzAxisRange(yawMin,yawMax);
+//joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
+//joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+
+joystick.setRzAxisRange(0,INT16_MAX);
+joystick.setRxAxisRange(0,INT16_MAX);
+joystick.setRyAxisRange(0,INT16_MAX);
 
 }
 
