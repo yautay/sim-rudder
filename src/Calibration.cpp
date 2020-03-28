@@ -134,9 +134,9 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         Serial.println(yawMax);
     }
     // set and save new ranges
-    joystick.setRzAxisRange(yawMin,yawMax);
-    joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-    joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+    joystick.setRzAxisRange(INT16_MIN, INT16_MAX);
+    joystick.setRxAxisRange(INT16_MIN, INT16_MAX);
+    joystick.setRyAxisRange(INT16_MIN, INT16_MAX);
 
     EEPROM.write(0, lowByte(yawMin));
     EEPROM.write(1, highByte(yawMin));
