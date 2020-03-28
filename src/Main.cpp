@@ -12,6 +12,8 @@
 #define GROUND 8
 #define ADS1115 0x48 //I2C
 
+int tmp = 0;
+
 Adafruit_ADS1115 adafruitAds1115(ADS1115);
 
 Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
@@ -67,23 +69,33 @@ joystick.begin();
 
 
 /*
- * Calibration variables are being read fm EEPROM on setup
+ * Calibration variables are being read fm EEPROM on srartup
  * */
 
 readEEPROM(debug,leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrakeMin);
-Serial.print(yawMax);
-Serial.print(yawMin);
-joystick.setRzAxisRange(yawMin,yawMax);
-joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
-joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+
+//joystick.setRzAxisRange(yawMin,yawMax);
+//joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
+//joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
+
+joystick.setRzAxisRange(0,1023);
+joystick.setRxAxisRange(0,1023);
+joystick.setRyAxisRange(0,1023);
 
 }
 
 void loop() {
 
-    channelYaw = adafruitAds1115.readADC_SingleEnded(0);
-    channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
-    channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
+//    channelYaw = adafruitAds1115.readADC_SingleEnded(0);
+//    channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
+//    channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
+
+    channelYaw = 0 + tmp;
+    channelRightBrk = 0 + tmp;
+    channelLeftBrk = 0 + tmp;
+
+    tmp++; //DEBUG
+    delay(50); //DEBUG
 
     if (debug) {
         Serial.print("Yaw : ");
@@ -95,9 +107,9 @@ void loop() {
     }
 
     // get filtered ADC values and set Axis
-    joystick.setRzAxis(125);  // Yaw
-    joystick.setRxAxis(-125);  // LeftBrake
-    joystick.setRyAxis(77);  // RightBrake
+    joystick.setRzAxis(channelYaw);  // Yaw
+    joystick.setRxAxis(channelLeftBrk);  // LeftBrake
+    joystick.setRyAxis(channelRightBrk);  // RightBrake
 
     joystick.sendState();
 

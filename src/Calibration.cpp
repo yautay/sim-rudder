@@ -14,6 +14,10 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
     rightBrakeMax = (EEPROM.read(10) | (EEPROM.read(11) << 8));
 
     if (debug){
+        for (int x = 10; x > 0; x++){
+            Serial.println(".");
+            delay(1000);
+        }
         Serial.println("EEPROM bits: ");
         for (int x = 0; x < 11; x++){
             Serial.print("Bit index ");
@@ -24,20 +28,24 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
             Serial.println(EEPROM.read(x) | (EEPROM.read(++x) << 8));
         }
         Serial.println("#### Summary: ####");
-        Serial.print("yawMin = ");
-        Serial.println(yawMin);
-        Serial.print("yawMax = ");
-        Serial.println(yawMax);
-        Serial.print("leftBrkMin = ");
-        Serial.println(leftBrakeMin);
-        Serial.print("rightBrkMin = ");
-        Serial.println(rightBrakeMin);
-        Serial.print("leftBrkMax = ");
+        Serial.print("Left Brake min: ");
+        Serial.print(leftBrakeMin);
+        Serial.print(" ; Left Brake max: ");
         Serial.println(leftBrakeMax);
-        Serial.print("rightBrkMax = ");
+        Serial.print("Right Brake min: ");
+        Serial.print(rightBrakeMin);
+        Serial.print(" ; Right Brake max: ");
         Serial.println(rightBrakeMax);
-        Serial.println("########");
-        delay(5000);
+        Serial.print("Yaw min: ");
+        Serial.print(yawMin);
+        Serial.print(" ; Yaw max: ");
+        Serial.println(yawMax);
+        Serial.println("################");
+        Serial.print("Wait 10 sec...");
+        for (int x = 10; x > 0; x++){
+            Serial.print(".");
+            delay(1000);
+        }
     }
 
 }
@@ -74,15 +82,12 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         Serial.println(leftBrakeMin);
         Serial.print("Right brake min: ");
         Serial.println(rightBrakeMin);
-        delay(5000);
     }
-
-
 
     while (!digitalRead(9)) {
 
         int pulses = 10;
-        int interval = 1;
+        int interval = 500; //milis
         unsigned long checkpoint;
 
         for (int x = 1; x <= pulses; x++){
@@ -111,7 +116,7 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
                 if (adafruitAds1115.readADC_SingleEnded(1) > rightBrakeMax) {
                     rightBrakeMax = adafruitAds1115.readADC_SingleEnded(1);
                 }
-            } while (checkpoint + (interval / 2 * 1000) > millis());
+            } while (checkpoint + (interval / 2) > millis());
         }
     } // capture max/min values
 
@@ -125,7 +130,6 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         Serial.println(yawMin);
         Serial.print("Yaw max: ");
         Serial.println(yawMax);
-        delay(5000);
     }
     // set and save new ranges
     joystick.setRzAxisRange(yawMin,yawMax);
@@ -146,6 +150,10 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
     EEPROM.write(11, highByte(rightBrakeMax));
 
     if (debug){
+        for (int x = 5; x > 0; x++){
+            Serial.println(".");
+            delay(1000);
+        }
         Serial.println("EEPROM bits: ");
         for (int x = 0; x < 11; x++){
             Serial.print("Bit index ");
@@ -156,20 +164,24 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
             Serial.println(EEPROM.read(x) | (EEPROM.read(++x) << 8));
         }
         Serial.println("#### Summary: ####");
-        Serial.print("yawMin = ");
-        Serial.println(yawMin);
-        Serial.print("yawMax = ");
-        Serial.println(yawMax);
-        Serial.print("leftBrkMin = ");
-        Serial.println(leftBrakeMin);
-        Serial.print("rightBrkMin = ");
-        Serial.println(rightBrakeMin);
-        Serial.print("leftBrkMax = ");
+        Serial.print("Left Brake min: ");
+        Serial.print(leftBrakeMin);
+        Serial.print(" ; Left Brake max: ");
         Serial.println(leftBrakeMax);
-        Serial.print("rightBrkMax = ");
+        Serial.print("Right Brake min: ");
+        Serial.print(rightBrakeMin);
+        Serial.print(" ; Right Brake max: ");
         Serial.println(rightBrakeMax);
-        Serial.println("########");
-        delay(5000);
+        Serial.print("Yaw min: ");
+        Serial.print(yawMin);
+        Serial.print(" ; Yaw max: ");
+        Serial.println(yawMax);
+        Serial.println("################");
+        Serial.print("Wait 5 sec...");
+        for (int x = 5; x > 0; x++){
+            Serial.print(".");
+            delay(1000);
+        }
     }
 
     ledSong(5,6,7);
