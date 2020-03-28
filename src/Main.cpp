@@ -12,7 +12,7 @@
 #define GROUND 8
 #define ADS1115 0x48 //I2C
 
-int tmp = 0;
+int16_t tmp = 0;
 
 Adafruit_ADS1115 adafruitAds1115(ADS1115);
 
