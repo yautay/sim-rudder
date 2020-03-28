@@ -14,7 +14,7 @@ void readEEPROM(bool debug,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t ya
     rightBrakeMax = (EEPROM.read(10) | (EEPROM.read(11) << 8));
 
     if (debug){
-        for (int x = 10; x > 0; x--){
+        for (int x = 3; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
@@ -42,8 +42,8 @@ void readEEPROM(bool debug,int16_t leftBrakeMax,int16_t rightBrakeMax,int16_t ya
         Serial.print(" ; Yaw max: ");
         Serial.println(yawMax);
         Serial.println("################");
-        Serial.print("Wait 10 sec...");
-        for (int x = 10; x > 0; x--){
+        Serial.print("Wait 3 sec...");
+        for (int x = 3; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
@@ -58,25 +58,24 @@ void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rig
     adafruitAds1115.begin();
     adafruitAds1115.setGain(GAIN_ONE);
 
-    leftBrakeMax=INT16_MIN;
-    rightBrakeMax=INT16_MIN;
-    yawMin=INT16_MAX;
-    yawMax=INT16_MIN;
+    leftBrakeMax = INT16_MIN;
+    rightBrakeMax = INT16_MIN;
+    yawMin = INT16_MAX;
+    yawMax = INT16_MIN;
 
     // start calibration with brakes in neutral position
     digitalWrite(5,HIGH);
     digitalWrite(7,HIGH);
-    delay(5000);
+    delay(3000);
     digitalWrite(5,LOW);
     digitalWrite(7,LOW);
-    delay(1000);
+    delay(250);
     digitalWrite(5,HIGH);
     digitalWrite(7,HIGH);
     leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
     rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
     digitalWrite(5,LOW);
     digitalWrite(7,LOW);
-    delay(2000);
 
     if(debug) {
         Serial.println("Calibration 1/2 ... ");
@@ -89,7 +88,7 @@ void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rig
     while (!digitalRead(9)) {
 
         uint8_t pulses = 10;
-        uint16_t interval = 500; //milis
+        uint16_t interval = 500;
         unsigned long checkpoint;
         uint16_t tmp;
 
@@ -105,38 +104,26 @@ void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rig
                     digitalWrite(6, LOW);
                     digitalWrite(7, LOW);
                 }
-                if (adafruitAds1115.readADC_SingleEnded(0) < yawMin) {
-                        yawMin = adafruitAds1115.readADC_SingleEnded(0);
-                }
                 tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (tmp > yawMax) {
-                    if(tmp > INT16_MAX){
-                        yawMax = INT16_MAX;
-                    } else {
-                        yawMax = tmp;
-                    }
-                    /*
-                     * adafruitAds1115.readADC_SingleEnded returns uint16_t -> that's why it's compared if not > INT16_MAX
-                     * */
+                if (yawMin < 0 || yawMax > tmp){
+                    yawMin = tmp;
                 }
+
+                tmp = adafruitAds1115.readADC_SingleEnded(0);
+                if (yawMax < 0 || yawMax < tmp){
+                    yawMax = tmp;
+                }
+
                 tmp = adafruitAds1115.readADC_SingleEnded(2);
-                if (tmp > leftBrakeMax) {
-                    if (tmp > INT16_MAX) {
-                        leftBrakeMax = INT16_MAX;
-                    } else {
-                    leftBrakeMax = tmp;
-                    }
-                    /*
-                     * adafruitAds1115.readADC_SingleEnded returns uint16_t -> that's why it's compared if not > INT16_MAX
-                     * */
-                }
-                tmp = adafruitAds1115.readADC_SingleEnded(1);
-                if (tmp > rightBrakeMax) {
-                    if (tmp > INT16_MAX)
-                    rightBrakeMax = INT16_MAX;
-                } else{
+                if (rightBrakeMax < 0 || rightBrakeMax < tmp){
                     rightBrakeMax = tmp;
                 }
+
+                tmp = adafruitAds1115.readADC_SingleEnded(1);
+                if (leftBrakeMax < 0 || leftBrakeMax < tmp){
+                    leftBrakeMax = tmp;
+                }
+
             } while (checkpoint + (interval / 2) > millis());
         }
     } // capture max/min values
@@ -171,7 +158,7 @@ void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rig
     EEPROM.write(11, highByte(rightBrakeMax));
 
     if (debug){
-        for (int x = 5; x > 0; x--){
+        for (int x = 3; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
@@ -199,8 +186,8 @@ void calibration(bool debug, Joystick_ joystick,int16_t leftBrakeMax,int16_t rig
         Serial.print(" ; Yaw max: ");
         Serial.println(yawMax);
         Serial.println("################");
-        Serial.print("Wait 5 sec...");
-        for (int x = 5; x > 0; x--){
+        Serial.print("Wait 3 sec...");
+        for (int x = 3; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
