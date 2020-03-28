@@ -42,7 +42,7 @@ unsigned int channelYaw;
 unsigned int channelLeftBrk;
 unsigned int channelRightBrk;
 
-bool debug = false;
+bool debug = true;
 
 void setup() {
 
@@ -78,9 +78,9 @@ readEEPROM(debug,leftBrakeMax,rightBrakeMax,yawMin,yawMax,leftBrakeMin,rightBrak
 //joystick.setRxAxisRange(leftBrakeMin,leftBrakeMax);
 //joystick.setRyAxisRange(rightBrakeMin,rightBrakeMax);
 
-joystick.setRzAxisRange(0,1023);
-joystick.setRxAxisRange(0,1023);
-joystick.setRyAxisRange(0,1023);
+joystick.setRzAxisRange(0,INT16_MAX);
+joystick.setRxAxisRange(0,INT16_MAX);
+joystick.setRyAxisRange(0,INT16_MAX);
 
 }
 
@@ -95,7 +95,7 @@ void loop() {
     channelLeftBrk = 0 + tmp;
 
     tmp++; //DEBUG
-    delay(50); //DEBUG
+    delay(25); //DEBUG
 
     if (debug) {
         Serial.print("Yaw : ");

@@ -14,10 +14,11 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
     rightBrakeMax = (EEPROM.read(10) | (EEPROM.read(11) << 8));
 
     if (debug){
-        for (int x = 10; x > 0; x++){
-            Serial.println(".");
+        for (int x = 10; x > 0; x--){
+            Serial.print(".");
             delay(1000);
         }
+        Serial.println("");
         Serial.println("EEPROM bits: ");
         for (int x = 0; x < 11; x++){
             Serial.print("Bit index ");
@@ -42,10 +43,11 @@ void readEEPROM(bool debug,unsigned int leftBrakeMax,unsigned int rightBrakeMax,
         Serial.println(yawMax);
         Serial.println("################");
         Serial.print("Wait 10 sec...");
-        for (int x = 10; x > 0; x++){
+        for (int x = 10; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
+        Serial.println("");
     }
 
 }
@@ -150,10 +152,11 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
     EEPROM.write(11, highByte(rightBrakeMax));
 
     if (debug){
-        for (int x = 5; x > 0; x++){
-            Serial.println(".");
+        for (int x = 5; x > 0; x--){
+            Serial.print(".");
             delay(1000);
         }
+        Serial.println("");
         Serial.println("EEPROM bits: ");
         for (int x = 0; x < 11; x++){
             Serial.print("Bit index ");
@@ -178,10 +181,11 @@ void calibration(bool debug, Joystick_ joystick,unsigned int leftBrakeMax,unsign
         Serial.println(yawMax);
         Serial.println("################");
         Serial.print("Wait 5 sec...");
-        for (int x = 5; x > 0; x++){
+        for (int x = 5; x > 0; x--){
             Serial.print(".");
             delay(1000);
         }
+        Serial.println("");
     }
 
     ledSong(5,6,7);
