@@ -46,6 +46,7 @@ void displayOledDots(int seconds);
 void displayOledMinMax();
 void displayOledWelcomeScr();
 void displayOledDoneMsg();
+void displayOledState();
 
 void setup() {
     pinMode(9,INPUT_PULLUP);
@@ -70,6 +71,8 @@ void loop() {
     joystick.setRzAxis(channelYaw);  // Yaw
     joystick.setRxAxis(channelLeftBrk);  // LeftBrake
     joystick.setRyAxis(channelRightBrk);  // RightBrake
+
+    displayOledState();
 
     if (!digitalRead(9)) {
         calibration();
@@ -97,8 +100,37 @@ void calibration(){
     yawMin = INT16_MAX;
     yawMax = INT16_MIN;
 
+    display.clearDisplay();
+    display.drawFastVLine(0,30,20,WHITE);
+    display.display();
+    wait(1500);
+
+    display.clearDisplay();
+    display.setCursor(5,5);
+    display.println("   CALIBRATION 1/2");
+    display.print("Keep all axes in neutral.");
+    display.display();
+    wait(2000);
+
     leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
     rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
+
+    display.clearDisplay();
+    display.drawFastVLine(0,30,20,WHITE);
+    display.display();
+    wait(1500);
+
+    display.clearDisplay();
+    display.setCursor(5,5);
+    display.println("   CALIBRATION 2/2");
+    display.println("Move all axes now.");
+    display.println("Disable cal. when ready.");
+    display.display();
+    wait(3000);
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Calibrating");
+    display.display();
 
     while (!digitalRead(9)) {
 
@@ -123,6 +155,9 @@ void calibration(){
         if (leftBrakeMax < tmp){
             leftBrakeMax = tmp;
         }
+
+        display.print(".");
+        display.display();
     }
 
     EEPROM.write(0, lowByte(yawMin));
@@ -137,6 +172,11 @@ void calibration(){
     EEPROM.write(9, highByte(rightBrakeMin));
     EEPROM.write(10, lowByte(rightBrakeMax));
     EEPROM.write(11, highByte(rightBrakeMax));
+
+    display.clearDisplay();
+    displayOledMinMax();
+    wait(5000);
+
 }
 void displayOledMinMax(){
     display.clearDisplay();
@@ -144,7 +184,7 @@ void displayOledMinMax(){
     display.setTextColor(WHITE);
     display.setCursor(0, 0);
     display.println("   Min/Max values: ");
-    display.print("Yaw: ");
+    display.print("Yaw:   ");
     display.print(yawMin);
     display.print(" / ");
     display.println(yawMax);
@@ -157,6 +197,7 @@ void displayOledMinMax(){
     display.print(" / ");
     display.println(rightBrakeMax);
     display.display();
+    wait(5000);
 }
 void displayOledDots(int seconds){
     checkpoint = millis();
@@ -190,6 +231,20 @@ void displayOledDoneMsg(){
     display.setTextColor(WHITE);
     display.setCursor(40, 10);
     display.println("DONE :)");
+    display.display();
+}
+void displayOledState(){
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(5, 5);
+    display.println("       Signals: ");
+    display.print("Yaw:   ");
+    display.println(channelYaw);
+    display.print("L Brk: ");
+    display.println(channelLeftBrk);
+    display.print("R brk: ");
+    display.println(channelRightBrk);
     display.display();
 }
 void wait(unsigned long milisecs){
