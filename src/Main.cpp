@@ -47,6 +47,7 @@ void displayOledMinMax();
 void displayOledWelcomeScr();
 void displayOledDoneMsg();
 void displayOledState();
+void displayOledTeleport();
 
 void setup() {
     pinMode(9,INPUT_PULLUP);
@@ -100,38 +101,34 @@ void calibration(){
     yawMin = INT16_MAX;
     yawMax = INT16_MIN;
 
-    display.clearDisplay();
-    display.drawFastVLine(0,30,20,WHITE);
-    display.display();
-    wait(1500);
+    displayOledTeleport();
 
     display.clearDisplay();
-    display.setCursor(5,5);
+    display.setCursor(0,0);
     display.println("   CALIBRATION 1/2");
-    display.print("Keep all axes in neutral.");
+    display.println("Keep all axes");
+    display.println(" in neutral.");
     display.display();
-    wait(2000);
+    wait(4000);
 
     leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
     rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
 
-    display.clearDisplay();
-    display.drawFastVLine(0,30,20,WHITE);
-    display.display();
-    wait(1500);
+    displayOledTeleport();
 
-    display.clearDisplay();
-    display.setCursor(5,5);
-    display.println("   CALIBRATION 2/2");
-    display.println("Move all axes now.");
-    display.println("Disable cal. when ready.");
-    display.display();
-    wait(3000);
     display.clearDisplay();
     display.setCursor(0,0);
-    display.println("Calibrating");
+    display.println("   CALIBRATION 2/2");
+    display.println("Move all axes now.");
+    display.println("Disable calibration");
+    display.println("upon completion");
     display.display();
-
+    wait(4000);
+    display.clearDisplay();
+    display.setCursor(0,0);
+    display.println("Calibration");
+    display.display();
+    int count = 0;
     while (!digitalRead(9)) {
 
         uint16_t tmp;
@@ -158,6 +155,12 @@ void calibration(){
 
         display.print(".");
         display.display();
+        count++;
+        if (count == 63){
+            display.clearDisplay();
+            display.setCursor(0,0);
+            count = 0;
+        }
     }
 
     EEPROM.write(0, lowByte(yawMin));
@@ -237,15 +240,25 @@ void displayOledState(){
     display.clearDisplay();
     display.setTextSize(1);
     display.setTextColor(WHITE);
-    display.setCursor(5, 5);
+    display.setCursor(0, 0);
     display.println("       Signals: ");
-    display.print("Yaw:   ");
+    display.print("  Yaw:        ");
     display.println(channelYaw);
-    display.print("L Brk: ");
+    display.print("  L Brk:      ");
     display.println(channelLeftBrk);
-    display.print("R brk: ");
+    display.print("  R brk:      ");
     display.println(channelRightBrk);
     display.display();
+}
+void displayOledTeleport(){
+    display.clearDisplay();
+    display.setCursor(0,30);
+    int count = 0;
+    while (count < 11){
+        display.print(".");
+        display.display();
+        count++;
+    }
 }
 void wait(unsigned long milisecs){
     unsigned long tmp = millis();
