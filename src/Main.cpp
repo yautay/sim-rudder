@@ -42,7 +42,6 @@ void readEEPROM();
 void setRanges();
 void calibration();
 void wait(unsigned long milisecs);
-void displayOledDots(int seconds);
 void displayOledMinMax();
 void displayOledWelcomeScr();
 void displayOledDoneMsg();
@@ -53,7 +52,7 @@ void setup() {
     pinMode(9,INPUT_PULLUP);
     display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
     displayOledWelcomeScr();
-    displayOledDots(5);
+    displayOledTeleport();
     adafruitAds1115.begin();
     adafruitAds1115.setGain(GAIN_ONE);
     joystick.begin();
@@ -96,10 +95,10 @@ void setRanges(){
     joystick.setRyAxisRange(rightBrakeMin, rightBrakeMax);
 }
 void calibration(){
-    leftBrakeMax = INT16_MIN;
-    rightBrakeMax = INT16_MIN;
-    yawMin = INT16_MAX;
-    yawMax = INT16_MIN;
+    leftBrakeMax = 0;
+    rightBrakeMax = 0;
+    yawMin = UINT16_MAX;
+    yawMax = 0;
 
     displayOledTeleport();
 
@@ -107,7 +106,7 @@ void calibration(){
     display.setCursor(0,0);
     display.println("   CALIBRATION 1/2");
     display.println("Keep all axes");
-    display.println(" in neutral.");
+    display.println("in neutral.");
     display.display();
     wait(4000);
 
@@ -121,7 +120,7 @@ void calibration(){
     display.println("   CALIBRATION 2/2");
     display.println("Move all axes now.");
     display.println("Disable calibration");
-    display.println("upon completion");
+    display.println("upon completion.");
     display.display();
     wait(4000);
     display.clearDisplay();
@@ -202,20 +201,6 @@ void displayOledMinMax(){
     display.display();
     wait(5000);
 }
-void displayOledDots(int seconds){
-    checkpoint = millis();
-    do {
-        display.clearDisplay();
-        display.setTextSize(1);
-        display.setTextColor(WHITE);
-        for (int x = 1; x <= seconds; x++){
-            display.setCursor(x * 10 , 10);
-            display.println(".");
-            display.display();
-            wait(1000);
-        }
-    } while (millis() - checkpoint <= seconds * 1000);
-}
 void displayOledWelcomeScr(){
     display.clearDisplay();
     display.setTextSize(1);
@@ -252,12 +237,11 @@ void displayOledState(){
 }
 void displayOledTeleport(){
     display.clearDisplay();
-    display.setCursor(0,30);
-    int count = 0;
-    while (count < 11){
+    display.setCursor(0,15);
+    for ( int x = 0; x < 21; x++){
         display.print(".");
         display.display();
-        count++;
+        wait(100);
     }
 }
 void wait(unsigned long milisecs){
