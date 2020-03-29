@@ -5,11 +5,7 @@
 #include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
 
-#define JUMPER 9
-#define ADS1115 0x48 //I2C
-#define OLED128x60 0x3C
-
-bool debug = false;
+unsigned long checkpoint;
 
 int16_t leftBrakeMax = 0;
 int16_t rightBrakeMax = 0;
@@ -23,7 +19,9 @@ int16_t channelLeftBrk;
 
 int16_t channelRightBrk;
 
-Adafruit_ADS1115 adafruitAds1115(ADS1115);
+Adafruit_ADS1115 adafruitAds1115(0x48);
+
+Adafruit_SSD1306 display(-1);
 
 Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
         0,
@@ -43,59 +41,41 @@ Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
 void readEEPROM();
 void setRanges();
 void calibration();
+void wait(unsigned long milisecs);
+void displayOledDots(int seconds);
+void displayOledMinMax();
+void displayOledWelcomeScr();
+void displayOledDoneMsg();
 
 void setup() {
-
-    if (debug) Serial.begin(9600);
-
-    /*
-     * Pin definitions
-     * Arduino no. 8 - ground pin for calibration jumper
-     * Arduino no. 9 - state pin for calibration jumper
-     * */
-
-    pinMode(JUMPER,INPUT_PULLUP);
-
+    pinMode(9,INPUT_PULLUP);
+    display.begin(SSD1306_SWITCHCAPVCC, 0x3C);
+    displayOledWelcomeScr();
+    displayOledDots(5);
     adafruitAds1115.begin();
     adafruitAds1115.setGain(GAIN_ONE);
-
     joystick.begin();
-
-    /*
-     * Calibration variables are being read fm EEPROM on start'up
-     * */
-
+    displayOledDoneMsg();
+    wait(2000);
     readEEPROM();
     setRanges();
-
+    displayOledMinMax();
 }
 
 void loop() {
-
     channelYaw = adafruitAds1115.readADC_SingleEnded(0);
     channelRightBrk = adafruitAds1115.readADC_SingleEnded(1);
     channelLeftBrk = adafruitAds1115.readADC_SingleEnded(2);
 
-    if (debug) {
-        Serial.print("Yaw : ");
-        Serial.print(channelYaw);
-        Serial.print(" // Left Brake : ");
-        Serial.print(channelLeftBrk);
-        Serial.print(" // Right Brake : ");
-        Serial.println(channelRightBrk);
-    }
-
-    // get filtered ADC values and set Axis
     joystick.setRzAxis(channelYaw);  // Yaw
     joystick.setRxAxis(channelLeftBrk);  // LeftBrake
     joystick.setRyAxis(channelRightBrk);  // RightBrake
 
-    if (!digitalRead(JUMPER)) {
+    if (!digitalRead(9)) {
         calibration();
         readEEPROM();
         setRanges();
     }
-    delay(25);
 }
 
 void readEEPROM(){
@@ -105,43 +85,6 @@ void readEEPROM(){
     leftBrakeMax = (EEPROM.read(6) | (EEPROM.read(7) << 8));
     rightBrakeMin = (EEPROM.read(8) | (EEPROM.read(9) << 8));
     rightBrakeMax = (EEPROM.read(10) | (EEPROM.read(11) << 8));
-
-    if (debug){
-        for (int x = 3; x > 0; x--){
-            Serial.print(".");
-            delay(1000);
-        }
-        Serial.println("");
-        Serial.println("EEPROM bits: ");
-        for (int x = 0; x < 11; x++){
-            Serial.print("Bit index ");
-            Serial.print(x);
-            Serial.print(" + ");
-            Serial.print(x + 1);
-            Serial.print(" : ");
-            Serial.println(EEPROM.read(x) | (EEPROM.read(++x) << 8));
-        }
-        Serial.println("#### Summary: ####");
-        Serial.print("Left Brake min: ");
-        Serial.print(leftBrakeMin);
-        Serial.print(" ; Left Brake max: ");
-        Serial.println(leftBrakeMax);
-        Serial.print("Right Brake min: ");
-        Serial.print(rightBrakeMin);
-        Serial.print(" ; Right Brake max: ");
-        Serial.println(rightBrakeMax);
-        Serial.print("Yaw min: ");
-        Serial.print(yawMin);
-        Serial.print(" ; Yaw max: ");
-        Serial.println(yawMax);
-        Serial.println("################");
-        Serial.print("Wait 3 sec...");
-        for (int x = 3; x > 0; x--){
-            Serial.print(".");
-            delay(1000);
-        }
-        Serial.println("");
-    }
 }
 void setRanges(){
     joystick.setRzAxisRange(yawMin, yawMax);
@@ -149,29 +92,16 @@ void setRanges(){
     joystick.setRyAxisRange(rightBrakeMin, rightBrakeMax);
 }
 void calibration(){
-
     leftBrakeMax = INT16_MIN;
     rightBrakeMax = INT16_MIN;
     yawMin = INT16_MAX;
     yawMax = INT16_MIN;
 
-    // start calibration with brakes in neutral position
     leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
     rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
 
-    if(debug) {
-        Serial.println("Calibration 1/2 ... ");
-        Serial.print("Left brake min: ");
-        Serial.println(leftBrakeMin);
-        Serial.print("Right brake min: ");
-        Serial.println(rightBrakeMin);
-    }
-
     while (!digitalRead(9)) {
 
-        uint8_t pulses = 10;
-        uint16_t interval = 500;
-        unsigned long checkpoint;
         uint16_t tmp;
 
         tmp = adafruitAds1115.readADC_SingleEnded(0);
@@ -193,19 +123,6 @@ void calibration(){
         if (leftBrakeMax < tmp){
             leftBrakeMax = tmp;
         }
-
-    } // capture max/min values
-
-    if (debug){
-        Serial.println("Calibration 2/2 ... ");
-        Serial.print("Left brake max: ");
-        Serial.println(leftBrakeMax);
-        Serial.print("Right brake max: ");
-        Serial.println(rightBrakeMax);
-        Serial.print("Yaw min: ");
-        Serial.println(yawMin);
-        Serial.print("Yaw max: ");
-        Serial.println(yawMax);
     }
 
     EEPROM.write(0, lowByte(yawMin));
@@ -220,41 +137,63 @@ void calibration(){
     EEPROM.write(9, highByte(rightBrakeMin));
     EEPROM.write(10, lowByte(rightBrakeMax));
     EEPROM.write(11, highByte(rightBrakeMax));
+}
+void displayOledMinMax(){
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(0, 0);
+    display.println("   Min/Max values: ");
+    display.print("Yaw: ");
+    display.print(yawMin);
+    display.print(" / ");
+    display.println(yawMax);
+    display.print("L Brk: ");
+    display.print(leftBrakeMin);
+    display.print(" / ");
+    display.println(leftBrakeMax);
+    display.print("R brk: ");
+    display.print(rightBrakeMin);
+    display.print(" / ");
+    display.println(rightBrakeMax);
+    display.display();
+}
+void displayOledDots(int seconds){
+    checkpoint = millis();
+    do {
+        display.clearDisplay();
+        display.setTextSize(1);
+        display.setTextColor(WHITE);
+        for (int x = 1; x <= seconds; x++){
+            display.setCursor(x * 10 , 10);
+            display.println(".");
+            display.display();
+            wait(1000);
+        }
+    } while (millis() - checkpoint <= seconds * 1000);
+}
+void displayOledWelcomeScr(){
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(30, 10);
+    display.println("SIM-RUDDER");
+    display.setCursor(15, 20);
+    display.println("INITIALIZATION...");
+    display.display();
 
-    if (debug){
-        for (int x = 3; x > 0; x--){
-            Serial.print(".");
-            delay(1000);
-        }
-        Serial.println("");
-        Serial.println("EEPROM bits: ");
-        for (int x = 0; x < 11; x++){
-            Serial.print("Bit index ");
-            Serial.print(x);
-            Serial.print(" + ");
-            Serial.print(x + 1);
-            Serial.print(" : ");
-            Serial.println(EEPROM.read(x) | (EEPROM.read(++x) << 8));
-        }
-        Serial.println("#### Summary: ####");
-        Serial.print("Left Brake min: ");
-        Serial.print(leftBrakeMin);
-        Serial.print(" ; Left Brake max: ");
-        Serial.println(leftBrakeMax);
-        Serial.print("Right Brake min: ");
-        Serial.print(rightBrakeMin);
-        Serial.print(" ; Right Brake max: ");
-        Serial.println(rightBrakeMax);
-        Serial.print("Yaw min: ");
-        Serial.print(yawMin);
-        Serial.print(" ; Yaw max: ");
-        Serial.println(yawMax);
-        Serial.println("################");
-        Serial.print("Wait 3 sec...");
-        for (int x = 3; x > 0; x--){
-            Serial.print(".");
-            delay(1000);
-        }
-        Serial.println("");
-    }
+    wait(2500);
+}
+void displayOledDoneMsg(){
+    display.clearDisplay();
+    display.setTextSize(1);
+    display.setTextColor(WHITE);
+    display.setCursor(40, 10);
+    display.println("DONE :)");
+    display.display();
+}
+void wait(unsigned long milisecs){
+    unsigned long tmp = millis();
+    do {
+    } while (millis() - tmp <= milisecs);
 }
