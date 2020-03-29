@@ -2,14 +2,12 @@
 #include "Arduino.h"
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
+#include <Adafruit_SSD1306.h>
 #include <EEPROM.h>
 
-#define LED1 5
-#define LED2 6
-#define LED3 7
 #define JUMPER 9
-#define GROUND 8
 #define ADS1115 0x48 //I2C
+#define OLED128x60 0x3C
 
 bool debug = false;
 
@@ -45,7 +43,6 @@ Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
 void readEEPROM();
 void setRanges();
 void calibration();
-void ledSong(int led1, int led2, int led3);
 
 void setup() {
 
@@ -57,14 +54,7 @@ void setup() {
      * Arduino no. 9 - state pin for calibration jumper
      * */
 
-    pinMode(GROUND,OUTPUT);
     pinMode(JUMPER,INPUT_PULLUP);
-    pinMode(LED1,OUTPUT);
-    pinMode(LED2,OUTPUT);
-    pinMode(LED3,OUTPUT);
-    digitalWrite(GROUND,LOW);
-
-    ledSong(LED1,LED2,LED3);
 
     adafruitAds1115.begin();
     adafruitAds1115.setGain(GAIN_ONE);
@@ -166,18 +156,8 @@ void calibration(){
     yawMax = INT16_MIN;
 
     // start calibration with brakes in neutral position
-    digitalWrite(5,HIGH);
-    digitalWrite(7,HIGH);
-    delay(3000);
-    digitalWrite(5,LOW);
-    digitalWrite(7,LOW);
-    delay(250);
-    digitalWrite(5,HIGH);
-    digitalWrite(7,HIGH);
     leftBrakeMin = adafruitAds1115.readADC_SingleEnded(2);
     rightBrakeMin = adafruitAds1115.readADC_SingleEnded(1);
-    digitalWrite(5,LOW);
-    digitalWrite(7,LOW);
 
     if(debug) {
         Serial.println("Calibration 1/2 ... ");
@@ -194,40 +174,26 @@ void calibration(){
         unsigned long checkpoint;
         uint16_t tmp;
 
-        for (int x = 1; x <= pulses; x++){
-            checkpoint = millis();
-            do {
-                if (x % 2 != 0) {
-                    digitalWrite(5, HIGH);
-                    digitalWrite(6, HIGH);
-                    digitalWrite(7, HIGH);
-                } else {
-                    digitalWrite(5, LOW);
-                    digitalWrite(6, LOW);
-                    digitalWrite(7, LOW);
-                }
-                tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (yawMin > tmp){
-                    yawMin = tmp;
-                }
-
-                tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (yawMax < tmp){
-                    yawMax = tmp;
-                }
-
-                tmp = adafruitAds1115.readADC_SingleEnded(2);
-                if (rightBrakeMax < tmp){
-                    rightBrakeMax = tmp;
-                }
-
-                tmp = adafruitAds1115.readADC_SingleEnded(1);
-                if (leftBrakeMax < tmp){
-                    leftBrakeMax = tmp;
-                }
-
-            } while (checkpoint + (interval / 2) > millis());
+        tmp = adafruitAds1115.readADC_SingleEnded(0);
+        if (yawMin > tmp){
+            yawMin = tmp;
         }
+
+        tmp = adafruitAds1115.readADC_SingleEnded(0);
+        if (yawMax < tmp){
+            yawMax = tmp;
+        }
+
+        tmp = adafruitAds1115.readADC_SingleEnded(2);
+        if (rightBrakeMax < tmp){
+            rightBrakeMax = tmp;
+        }
+
+        tmp = adafruitAds1115.readADC_SingleEnded(1);
+        if (leftBrakeMax < tmp){
+            leftBrakeMax = tmp;
+        }
+
     } // capture max/min values
 
     if (debug){
@@ -291,39 +257,4 @@ void calibration(){
         }
         Serial.println("");
     }
-
-    ledSong(5,6,7);
-
-}
-void ledSong(int led1, int led2, int led3){
-    digitalWrite(led1,HIGH);
-    delay(500);
-    digitalWrite(led1,LOW);
-    digitalWrite(led2,HIGH);
-    delay(500);
-    digitalWrite(led2,LOW);
-    digitalWrite(led3,HIGH);
-    delay(500);
-    digitalWrite(led1,HIGH);
-    digitalWrite(led2,HIGH);
-    delay(500);
-    digitalWrite(led1,LOW);
-    digitalWrite(led2,LOW);
-    digitalWrite(led3,LOW);
-    delay(500);
-    digitalWrite(led1,HIGH);
-    digitalWrite(led2,HIGH);
-    digitalWrite(led3,HIGH);
-    delay(500);
-    digitalWrite(led1,LOW);
-    digitalWrite(led2,LOW);
-    digitalWrite(led3,LOW);
-    delay(500);
-    digitalWrite(led1,HIGH);
-    digitalWrite(led2,HIGH);
-    digitalWrite(led3,HIGH);
-    delay(500);
-    digitalWrite(led1,LOW);
-    digitalWrite(led2,LOW);
-    digitalWrite(led3,LOW);
 }
