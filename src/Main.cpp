@@ -2,7 +2,6 @@
 #include "Arduino.h"
 #include <Joystick.h>
 #include <Adafruit_ADS1015.h>
-#include <Leds.h>
 #include <EEPROM.h>
 
 #define LED1 5
@@ -46,6 +45,7 @@ Joystick_ joystick(JOYSTICK_DEFAULT_REPORT_ID, JOYSTICK_TYPE_JOYSTICK,
 void readEEPROM();
 void setRanges();
 void calibration();
+void ledSong(int led1, int led2, int led3);
 
 void setup() {
 
@@ -207,22 +207,22 @@ void calibration(){
                     digitalWrite(7, LOW);
                 }
                 tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (yawMin < 0 || yawMin > tmp){
+                if (yawMin > tmp){
                     yawMin = tmp;
                 }
 
                 tmp = adafruitAds1115.readADC_SingleEnded(0);
-                if (yawMax < 0 || yawMax < tmp){
+                if (yawMax < tmp){
                     yawMax = tmp;
                 }
 
                 tmp = adafruitAds1115.readADC_SingleEnded(2);
-                if (rightBrakeMax < 0 || rightBrakeMax < tmp){
+                if (rightBrakeMax < tmp){
                     rightBrakeMax = tmp;
                 }
 
                 tmp = adafruitAds1115.readADC_SingleEnded(1);
-                if (leftBrakeMax < 0 || leftBrakeMax < tmp){
+                if (leftBrakeMax < tmp){
                     leftBrakeMax = tmp;
                 }
 
@@ -294,4 +294,36 @@ void calibration(){
 
     ledSong(5,6,7);
 
+}
+void ledSong(int led1, int led2, int led3){
+    digitalWrite(led1,HIGH);
+    delay(500);
+    digitalWrite(led1,LOW);
+    digitalWrite(led2,HIGH);
+    delay(500);
+    digitalWrite(led2,LOW);
+    digitalWrite(led3,HIGH);
+    delay(500);
+    digitalWrite(led1,HIGH);
+    digitalWrite(led2,HIGH);
+    delay(500);
+    digitalWrite(led1,LOW);
+    digitalWrite(led2,LOW);
+    digitalWrite(led3,LOW);
+    delay(500);
+    digitalWrite(led1,HIGH);
+    digitalWrite(led2,HIGH);
+    digitalWrite(led3,HIGH);
+    delay(500);
+    digitalWrite(led1,LOW);
+    digitalWrite(led2,LOW);
+    digitalWrite(led3,LOW);
+    delay(500);
+    digitalWrite(led1,HIGH);
+    digitalWrite(led2,HIGH);
+    digitalWrite(led3,HIGH);
+    delay(500);
+    digitalWrite(led1,LOW);
+    digitalWrite(led2,LOW);
+    digitalWrite(led3,LOW);
 }
